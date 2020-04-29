@@ -31,9 +31,8 @@ A message identifier is a unique identifier for every message which describes th
 
 `mm:<message type>:<message hash>:<receiver type>`
 
-// TODO: `receiver type` needs to be better defined for message types which are not P2P
-
 e.g. `mm:p2p:QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31:0x9d46038705501f8cb832e5a18492517538b636f3`
+e.g. `mm:d2p:QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31:broadcast#QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31`
 
 ## Message Unique Suffix
 
@@ -42,7 +41,28 @@ e.g. The messaging unique suffix of P2P text message would be `mm:p2p:`
 
 ## Message Types
 
+Message Types define the different categories of messages that can be sent.
+
+- P2P (Message type `p2p`)
+- D2P (Message type `d2p`)
+
 ## Message Object
+
+Subject to change.
+
+```json
+{
+  "sender": "0x9d46038705501f8cb832e5a18492517538b636f3",
+  "message": "<Base64 encoded data>"
+}
+```
+
+## Receiver Types
+
+Receiver Types define the different categories of receivers that messages can be sent to.
+
+- P2P (Receiver type `<address>` e.g. `0x9d46038705501f8cb832e5a18492517538b636f3`)
+- D2P (Receiver type `broadcast#<contractAddress>` e.g. `broadcast#QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31`)
 
 ## Messaging Security
 
