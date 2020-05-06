@@ -52,8 +52,8 @@ Subject to change.
 
 ```json
 {
-  "sender": "0x9d46038705501f8cb832e5a18492517538b636f3",
-  "message": "<Base64 encoded data>"
+	"message": "<b64 encrypted digitally signed message>",
+	"timestamp": "<timestamp>"
 }
 ```
 
@@ -66,8 +66,20 @@ Receiver Types define the different categories of receivers that messages can be
 
 ## Messaging Security
 
+// TODO: encrypted using recipient's key
+
 ## Lifecycle
+
+TODO:
+
+sender convey client > ipfs > blockchain > receiver convey client 
 
 ## Anti-Spam Protections
 
+TODO: blacklist
+
 ## REST API
+
+TODO:
+
+1. GET /messages - return array of message objects
