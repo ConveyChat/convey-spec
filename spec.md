@@ -34,41 +34,30 @@ Convey is not an Ethereum-specific protocol, but can be used across various dece
 | Message Hash             | The DCAS hash returned for the message object                                                         |
 | Message Identifier (MID) | A unique identifier for every message which describes the message type and other specific information |
 | Message Object           | The data structure representing a message                                                             |
+| Blockchain Identifier    | A string representation of a blockchain and network e.g. `ethereum@ropsten`, `algorand@testnet`       |
 
 ## Message Identifier (MID)
 
 A message identifier is a unique identifier for every message which describes the message type and other specific information. It contains the following parameters:
 
-| _Parameter_     | _Description_                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------------- |
-| `MESSAGE_TYPE`  | `p2p` or `d2p` describing if the message is a Peer-to-Peer message or a Dapp-to-Peers broadcast               |
-| `MESSAGE_HASH`  | DCAS hash of the message object                                                                               |
-| `RECEIVER_TYPE` | Blockchain external account address or contract account address for `p2p` and `d2p` transactions respectively |
+| _Parameter_             | _Description_                                           |
+| ----------------------- | ------------------------------------------------------- |
+| `MESSAGE_HASH`          | DCAS hash of the message object                         |
+| `RECEIVER_TYPE`         | Blockchain external account address or contract address |
+| `BLOCKCHAIN_IDENTIFIER` | Blockchain identifier for the receiver type             |
 
 **Syntax**
 
-`mm:<MESSAGE_TYPE>:<MESSAGE_HASH>:<RECEIVER_TYPE>`
+`mid:<MESSAGE_HASH>:<RECEIVER_TYPE>:<BLOCKCHAIN_IDENTIFIER>`
 
-e.g. `mm:p2p:QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31:0x9d46038705501f8cb832e5a18492517538b636f3`
-e.g. `mm:d2p:QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31:broadcast#QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31`
+e.g. `mid:QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31:0x9d46038705501f8cb832e5a18492517538b636f3:ethereum@ropsten`
+e.g. `mid:QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31:broadcast#0xd0a6E6C54DbC68Db5db3A091B171A77407Ff7ccf:ethereum@mainnet`
 
-## Message Types
+## Message Hash
 
-Message Types define the different categories of messages that can be sent.
+A message hash is the hash returned from the DCAS when you upload the Message Object.
 
-- P2P (Message type `p2p`)
-- D2P (Message type `d2p`)
-
-## Message Object
-
-// TODO: Define `message` in depth
-
-```json
-{
-  "message": "<b64 encrypted digitally signed message>",
-  "timestamp": "<timestamp>"
-}
-```
+E.g. In the case of IPFS, it will look something like `QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31`
 
 ## Receiver Types
 
@@ -77,9 +66,53 @@ Receiver Types define the different categories of receivers that messages can be
 - P2P (Receiver type `<address>` e.g. `0x9d46038705501f8cb832e5a18492517538b636f3`)
 - D2P (Receiver type `broadcast#<contractAddress>` e.g. `broadcast#QmbyizSHLirDfZhms75tdrrdiVkaxKvbcLpXzjB5k34a31`)
 
+## Blockchain Identifier
+
+A blockchain identifier is used to specify what blockchain and network the sender and receivers are using. It is represented by the `<blockchain name> + @ + <network name>`
+
+E.g. `ethereum@ropsten` , `algorand@testnet`
+
+## Message Object
+
+The message object is what gets uploaded to the CAS and it's hash is put on chain. It has the following syntax
+
+```json
+{
+  "payload": "<compressed encrypted digitally signed message>",
+  "timestamp": "<timestamp>"
+}
+```
+
+where `payload` is a string representation of the following **Intermediate Message Object** encrypted with the receiver's public key and then compressed
+
+```json
+{
+  "message": {
+    "body": {
+      "title": "<message title>",
+      "text": "<text message>",
+      "image": "<image base64 data>",
+      "html": "<html message>"
+    },
+    "sender": {
+      "address": "<sender address>",
+      "blockchainIdentifier": "<blockchain identifier>"
+    }
+  },
+  "signature": "<signed message with sender private key>"
+}
+```
+
 ## Messaging Security
 
-// TODO: encrypted using recipient's key
+1. An intermediate message object is generated from the client application
+2. The intermediate message object is signed using the sender's private key and the `signature` is added as a property to the message object
+3. The new message object is encrypted with the receiver's public key
+4. The encrypted message object is compressed and converted to a string
+5. A message object is generated with the payload being the encrypted compressed string along with a unix timestamp
+6. The message object is uploaded to the DCAS and a blockchain transaction is made to anchor the hash on chain as a Message Identifier
+7. Reciever client listener will parse the message, and decrypt it using their private key
+8. Receiver client will verify signature to ensure it's coming from the correct sender
 
 ## Lifecycle
 
@@ -105,7 +138,7 @@ Metamask, Trust Wallet, Argent Wallet (Integrated with Convey)
 
 - "Convey API URL" - http://localhost:3000 OR https://api.convey.chat/ OR https://competitor.api.com
 
-- YOu receive a new message id `mm:d2p:whatever:broadcast#ensSmartContract`
+- YOu receive a new message id `mid:d2p:whatever:broadcast#ensSmartContract`
 
 - GET /subscriptions from API (http://localhost:3000 OR https://api.convey.chat/ OR https://competitor.api.com)
 - if ensSmartContract in subscriptions:
